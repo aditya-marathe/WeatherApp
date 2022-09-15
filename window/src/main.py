@@ -88,6 +88,11 @@ def get_weather(location="London") -> int | dict:
 
 
 def main(*args, **kwargs) -> int:
+    """Window Weather App.
+
+    Returns:
+        int: Exit code.
+    """
     root = tk.Tk()
         
     # Display Info
@@ -198,7 +203,7 @@ def main(*args, **kwargs) -> int:
 
         # UI Updates
         temperature_units = "°C" if UNITS == "metric" else "°F"
-        speed_units = " m/s" if UNITS == "metric" else " mph"
+        speed_units = " ms\u207b\xb9" if UNITS == "metric" else " mph"
 
         location.set(weather["location"])
         temperature.set(weather["temperature"] + temperature_units)
