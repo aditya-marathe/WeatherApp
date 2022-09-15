@@ -1,4 +1,7 @@
-__version__ = "v0.8"
+# !/usr/bin/env python
+# coding: utf-8
+
+__version__ = "v1.0"
 __author__ = "Aditya Marathe"
 
 import os
@@ -6,7 +9,9 @@ import sys
 
 import json
 import requests
+from numpy import loadtxt
 
+import time
 import datetime
 
 import tkinter as tk
@@ -35,17 +40,12 @@ SUBTITLE_FONT = ("Microsoft JhengHei Light", 20)
 TEXT_FONT = ("Microsoft YaHei UI", 10)
 BOLD_FONT = ("Microsoft YaHei UI", 10, "bold")
 
-
-def rgb2hex(r, g, b) -> str:
-    return f"#{r:02x}{g:02x}{b:02x}"
-
-
 # UI: Colours
-DAY_BG_COLOUR = rgb2hex(100, 150, 200)
-NIGHT_BG_COLOUR = rgb2hex(0, 50, 100)
+DAY_BG_COLOUR = "#4472C4"
+DAY_FG_COLOUR = "#000000"
 
-DAY_FG_COLOUR = rgb2hex(0, 0, 0)
-NIGHT_FG_COLOUR = rgb2hex(255, 255, 255)
+NIGHT_BG_COLOUR = "#203864"
+NIGHT_FG_COLOUR = "#FFFFFF"
 
 
 def get_weather(location="London") -> int | dict:
@@ -80,7 +80,7 @@ def get_weather(location="London") -> int | dict:
     output["wind_deg"] = str(round(api_response["wind"]["deg"]))
     
     output["location"] = api_response["name"] + ", " + api_response["sys"]["country"]
-    output["description"] = api_response["weather"][0]["description"].capitalize()
+    output["description"] = api_response["weather"][0]["description"].title()
 
     output["icon"] = api_response["weather"][0]["icon"]
 
@@ -100,18 +100,32 @@ def main(*args, **kwargs) -> int:
     SCREEN_HEIGHT = root.winfo_screenheight()
 
     # Window: Size, Placement
-    WIDTH, HEIGHT = 500, 500
+    WIDTH, HEIGHT = 500, 535
     X = (SCREEN_WIDTH - WIDTH) // 2
     Y = (SCREEN_HEIGHT - HEIGHT) // 3
 
-    root.title(f"Window Weather")
+    root.title(f" Window Weather")
     root.geometry(f"{WIDTH}x{HEIGHT}+{X}+{Y}")
-    root.iconbitmap(RES_DIR + "logo.ico")
     root.resizable(False, False)
 
     root.grid_rowconfigure(0, weight=1)
+    root.grid_rowconfigure(1, weight=100)
     root.grid_columnconfigure(0, weight=1)
 
+    root["bg"] = "white"
+
+    #
+    # data = sorted(loadtxt(RES_DIR + "city_names.csv", 
+    #           delimiter = "\n", dtype=str)[1:].tolist())
+    #
+
+    # Window: Colours
+    bg_colour = DAY_BG_COLOUR
+    fg_colour = DAY_FG_COLOUR
+
+    # Window: Variables
+    time_text = tk.StringVar()
+    greeting_text = tk.StringVar()
     location = tk.StringVar()
     temperature = tk.StringVar()
     feels_like = tk.StringVar()
@@ -122,14 +136,11 @@ def main(*args, **kwargs) -> int:
 
     # Window: Background
     bg_label = tk.Label(root, bd=0)
-    bg_label.grid(row=0, column=0)
+    bg_label.grid(row=0, column=0, sticky=tk.N)
 
     # Window: Container
-    bg_colour = DAY_BG_COLOUR
-    fg_colour = DAY_FG_COLOUR
-
-    container = tk.Frame(root, bg=bg_colour, highlightbackground="white", highlightthickness=2)
-    container.grid(row=0, column=0, sticky=tk.NSEW, padx=100, pady=100)
+    container = tk.Frame(root, highlightbackground="white", highlightthickness=2)
+    container.grid(row=0, column=0, sticky=tk.NSEW, padx=100, pady=90)
 
     container.grid_rowconfigure(0, weight=0)
     container.grid_rowconfigure(1, weight=0)
@@ -143,50 +154,69 @@ def main(*args, **kwargs) -> int:
     container.grid_columnconfigure(1, weight=1)
     
     tk.Label(
-        container, textvariable=location, bg=bg_colour, fg=fg_colour, font=SUBTITLE_FONT, wraplength=280
+        container, textvariable=location, font=SUBTITLE_FONT, wraplength=280
     ).grid(row=0, columnspan=2, padx=10, pady=(10, 0))
     
     # Window: Container: Small Container
-    small_container = tk.Frame(container, bg=bg_colour)
+    small_container = tk.Frame(container)
     small_container.grid(row=1, columnspan=2)
-    icon_label = tk.Label(small_container, bg=bg_colour)
+    icon_label = tk.Label(small_container)
     icon_label.grid(row=1, column=0, sticky=tk.E)
     tk.Label(
-        small_container, textvariable=temperature, bg=bg_colour, fg=fg_colour, font=TITLE_FONT
+        small_container, textvariable=temperature, font=TITLE_FONT
     ).grid(row=1, column=1, sticky=tk.W)
     
     # Window: Container
     tk.Label(
-        container, text="Feels like", bg=bg_colour, fg=fg_colour, font=BOLD_FONT
+        container, text="Feels like", font=BOLD_FONT
     ).grid(row=2, column=0, sticky=tk.E)
     tk.Label(
-        container, textvariable=feels_like, bg=bg_colour, fg=fg_colour, font=BOLD_FONT
+        container, textvariable=feels_like, font=BOLD_FONT
     ).grid(row=2, column=1, sticky=tk.W)
 
     tk.Label(
-        container, textvariable=description, bg=bg_colour, fg=fg_colour, font=SUBTITLE_FONT
+        container, textvariable=description, font=SUBTITLE_FONT
     ).grid(row=3, columnspan=2, pady=(0, 10))
     
     tk.Label(
-        container, text="Humidity", bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, text="Humidity", font=TEXT_FONT
     ).grid(row=4, column=0, sticky=tk.E)
     tk.Label(
-        container, textvariable=humidity, bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, textvariable=humidity, font=TEXT_FONT
     ).grid(row=4, column=1, stick=tk.W)
 
     tk.Label(
-        container, text="Wind speed", bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, text="Wind speed", font=TEXT_FONT
     ).grid(row=5, column=0, sticky=tk.E)
     tk.Label(
-        container, textvariable=wind_speed, bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, textvariable=wind_speed, font=TEXT_FONT
     ).grid(row=5, column=1, stick=tk.W)
 
     tk.Label(
-        container, text="Wind deg.", bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, text="Wind deg.", font=TEXT_FONT
     ).grid(row=6, column=0, sticky=tk.E, pady=(0, 10))
     tk.Label(
-        container, textvariable=wind_deg, bg=bg_colour, fg=fg_colour, font=TEXT_FONT
+        container, textvariable=wind_deg, font=TEXT_FONT
     ).grid(row=6, column=1, stick=tk.W, pady=(0, 10))
+
+    # Window: Bottom Bar
+    bottom_bar = tk.Frame(root)
+    bottom_bar.grid(row=1, column=0, sticky=tk.NSEW, pady=(2, 0))
+
+    tk.Label(
+        bottom_bar, textvariable=greeting_text, font=TEXT_FONT
+    ).pack(side=tk.LEFT, padx=10, pady=5)
+
+    tk.Label(
+        bottom_bar, textvariable=time_text, font=TEXT_FONT
+    ).pack(side=tk.RIGHT, padx=10, pady=5)
+
+    # Reference for later
+    children = []
+    children.extend(root.winfo_children())
+    children.extend(container.winfo_children())
+    children.extend(small_container.winfo_children())
+    children.extend(bottom_bar.winfo_children())
 
     # Window: Auto Updates
     def update_weather() -> int:
@@ -222,12 +252,52 @@ def main(*args, **kwargs) -> int:
         icon_label["image"] = image
         icon_label.image = image
 
+        root.iconphoto(False, image)
+
+        time_code = list(icon)[-1]
+        if time_code == "d":
+            bg_colour = DAY_BG_COLOUR
+            fg_colour = DAY_FG_COLOUR
+        elif time_code == "n":
+            bg_colour = NIGHT_BG_COLOUR
+            fg_colour = NIGHT_FG_COLOUR
+
+        for child in children:
+            try:
+                child["bg"] = bg_colour
+                child["fg"] = fg_colour
+            except tk.TclError:
+                pass
+
         root.update_idletasks()
 
         # Loop
         root.after(60_000, update_weather)
 
         return 0
+
+
+    def update_bar() -> None:
+        current_hour = datetime.datetime.now().hour
+
+        # UI Updates
+        if current_hour < 12:
+            greeting_text.set("Good Morning")
+        elif current_hour < 18:
+            greeting_text.set("Good Afternoon")
+        elif current_hour < 20:
+            greeting_text.set("Good Evening")
+        elif current_hour < 24:
+            greeting_text.set("Good Night")
+
+        time_text.set(time.strftime("%H:%M:%S"))
+
+        # Loop
+        root.after(1_000, update_bar)
+
+
+    # Window: Updates
+    update_bar()
 
     if update_weather() == -1:
         return -1
