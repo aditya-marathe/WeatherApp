@@ -51,6 +51,9 @@ NIGHT_FG_COLOUR = "#FFFFFF"
 def get_weather(location="London") -> int | dict:
     """Gets the weather at any location (city name).
 
+    Notes:
+        Uses the `requests` module to get weather information from OpenWeather API.
+
     Args:
         location (str, optional): Location. Defaults to "London".
 
