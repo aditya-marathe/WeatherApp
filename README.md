@@ -3,7 +3,8 @@ Window is a Python weather app which uses the OpenWeather API to get current wea
 
 # Screenshots
 
-![Screenshot](screenshot.png)
+![Screenshot 1](screenshot.png)
+![Screenshot 2](screenshot2.png)
 
 # Credits
 
